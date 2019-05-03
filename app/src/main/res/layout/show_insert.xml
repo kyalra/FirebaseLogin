@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:hint="Nama"
+            android:textStyle="bold"
+            android:id="@+id/tvNama"/>
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Status"
+            android:textSize="18sp"
+            android:paddingLeft="20dp"
+            android:id="@+id/tvStatus"/>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="10dp"
+
+    >
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="UPDATE"
+                android:id="@+id/textUpdate"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                android:padding="10dp"
+
+        />
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DELETE"
+                android:textSize="18sp"
+                android:id="@+id/textDelete"
+                android:textAlignment="center"
+                android:padding="10dp"
+        />
+    </LinearLayout>
+</LinearLayout>
