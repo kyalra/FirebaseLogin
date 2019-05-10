@@ -13,8 +13,37 @@
         <de.hdodenhof.circleimageview.CircleImageView
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:id="@+id/messenggerImageView"
+                android:id="@+id/messagerImageView"
                 android:src="@android:drawable/btn_star_big_off"/>
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:id="@+id/messageTextView"
+                    android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+            <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/messageImageView"
+                    android:adjustViewBounds="true"
+                    android:background="@color/colorPrimary"
+                    android:scaleType="fitCenter"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:id="@+id/messagerTextView"
+                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
