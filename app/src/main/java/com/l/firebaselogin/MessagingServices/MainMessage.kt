@@ -105,6 +105,7 @@ class MainMessage : AppCompatActivity(),
         mMessageRecyclerView = findViewById<View>(R.id.messageRecycleView) as RecyclerView
         mLinearLayoutManager = LinearLayoutManager(this)
         mLinearLayoutManager!!.stackFromEnd = true
+        mMessageRecyclerView!!.layoutManager = mLinearLayoutManager
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().reference
 
         val parser = SnapshotParser<FriendlyServices> { dataSnapshot ->
@@ -134,7 +135,7 @@ class MainMessage : AppCompatActivity(),
                 if (model.getText() != null) {
                     holder.messageTextView.text = model.getText()
                     holder.messageTextView.visibility = TextView.VISIBLE
-                    holder.messagerImageView.visibility = ImageView.GONE
+                    holder.messageImageView.visibility = ImageView.GONE
                 } else if (model.getImageUrl() != null) {
                     val imageUrl = model.getImageUrl()
                     if (imageUrl!!.startsWith("gs://")) {
@@ -144,7 +145,7 @@ class MainMessage : AppCompatActivity(),
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
                                     val downloadUrl = task.result!!.toString()
-                                    Glide.with(holder.messagerImageView.context)
+                                    Glide.with(holder.messageImageView.context)
                                         .load(downloadUrl)
                                         .into(holder.messagerImageView)
                                 } else {
@@ -154,7 +155,7 @@ class MainMessage : AppCompatActivity(),
                     } else {
                         Glide.with(holder.messagerImageView.context)
                             .load(model.getImageUrl()!!)
-                            .into(holder.messagerImageView)
+                            .into(holder.messageImageView)
                     }
                     holder.messageImageView.visibility = ImageView.VISIBLE
                     holder.messageTextView.visibility = TextView.GONE
@@ -167,6 +168,8 @@ class MainMessage : AppCompatActivity(),
                             android.R.drawable.btn_star_big_off
                         )
                     )
+                } else {
+                    Glide.with(this@MainMessage).load(model.getphotoUrl()).into(holder.messagerImageView)
                 }
             }
         }
@@ -200,7 +203,7 @@ class MainMessage : AppCompatActivity(),
                 }
             }
 
-            override fun afterTextChanged(s: Editable) {}
+            override fun afterTextChanged(s: Editable?) {}
         })
         mSendButton = findViewById<View>(R.id.sendButton) as Button
         mSendButton!!.setOnClickListener(
@@ -219,7 +222,7 @@ class MainMessage : AppCompatActivity(),
         mAddMessageImageView = findViewById<View>(R.id.addMessageImageView) as ImageView
         mAddMessageImageView!!.setOnClickListener(
             object : View.OnClickListener {
-                override fun onClick(v: View?) {
+                override fun onClick(v: View) {
                     //select image for image message on click
                     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                     intent.addCategory(Intent.CATEGORY_OPENABLE)
@@ -253,7 +256,7 @@ class MainMessage : AppCompatActivity(),
 
     override fun onResume() {
         super.onResume()
-        mFirebaseAdapter!!.stopListening()
+        mFirebaseAdapter!!.startListening()
     }
 
     override fun onDestroy() {
@@ -267,13 +270,18 @@ class MainMessage : AppCompatActivity(),
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
+        when (item!!.itemId) {
             R.id.signout_menu -> {
                 mFirebaseAuth!!.signOut()
                 Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                mUsername = ANONYMOUS
+                startActivity(Intent(this, ActivitySign::class.java))
+                finish()
+                return true
             }
+            else -> return super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
+
 
     }
 
@@ -288,7 +296,7 @@ class MainMessage : AppCompatActivity(),
             if (resultCode == Activity.RESULT_OK) {
                 if (data != null) {
                     val uri = data.data
-                    Log.d(TAG, "Uri:" + uri!!.toString())
+                    Log.d(TAG, "Uri" + uri!!.toString())
 
                     val tempMessage = FriendlyServices(
                         null, mUsername!!, mPhotoUrl!!, LOADING_IMAGE_URL
@@ -305,7 +313,7 @@ class MainMessage : AppCompatActivity(),
                                     putImageInStorage(storageReference, uri, key)
 
                                 } else {
-                                    Log.w(TAG, "Unable to write" + "message to database", p0.toException())
+                                    Log.w(TAG, "Unable to write" + "message to database.", p0!!.toException())
                                 }
                             }
                         })
@@ -314,18 +322,43 @@ class MainMessage : AppCompatActivity(),
         }
     }
 
-    private fun putImageInStorage(storageReference: StorageReference, uri: Uri?, key: String) {
-        storageReference.putFile(uri!!).addOnCompleteListener(this@MainMessage, object :
-            OnCompleteListener<UploadTask.TaskSnapshot> {
-            override fun onComplete(p0: Task<UploadTask.TaskSnapshot>) {
-                if (p0.isSuccessful) {
-                    val friendlyMessage = FriendlyServices(null, mUsername!!, mPhotoUrl!!, p0.result!!.toString())
-                    mFirebaseDatabaseReference!!.child(MESSAGE_CHILD).child(key!!).setValue(friendlyMessage)
-                }
-            }
-
-        })
-
+    private fun putImageInStorage(
+        storageReference:
+        StorageReference, uri: Uri?, key: String?
+    ) {
+        storageReference.putFile(uri!!)
+            .addOnCompleteListener(this@MainMessage,
+                object : OnCompleteListener<UploadTask.TaskSnapshot> {
+                    override fun onComplete(
+                        task: Task<UploadTask
+                        .TaskSnapshot>
+                    ) {
+                        if (task.isSuccessful) {
+                            task.result!!.metadata!!
+                                .reference!!.downloadUrl
+                                .addOnCompleteListener(this@MainMessage,
+                                    object : OnCompleteListener<Uri> {
+                                        override fun onComplete(task: Task<Uri>) {
+                                            if (task.isSuccessful) {
+                                                val friendlyMessage = FriendlyServices(
+                                                    null, mUsername!!, mPhotoUrl!!,
+                                                    task.result!!.toString()
+                                                )
+                                                mFirebaseDatabaseReference!!
+                                                    .child(MESSAGE_CHILD).child(key!!)
+                                                    .setValue(friendlyMessage)
+                                            }
+                                        }
+                                    })
+                        } else {
+                            Log.w(
+                                TAG, "Image upload" +
+                                        " task was not successful.",
+                                task.exception
+                            )
+                        }
+                    }
+                })
     }
 }
 
