@@ -12,7 +12,7 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".UploadType2">
+        <activity android:name=".MessagingServices.MainMessage">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -21,6 +21,8 @@
         </activity>
         <activity android:name=".ShowData"/>
         <activity android:name=".Add_Data.Add_Data_Act"/>
+        <activity android:name=".MessagingServices.ActivitySign"/>
+
     </application>
 
 
